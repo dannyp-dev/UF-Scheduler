@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "react-oidc-context";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { IoClose, IoSend, IoChatbubblesOutline } from "react-icons/io5";
-import { BACKEND_URLS, getAuthHeaders } from "../../config/api";
+import { AUTH_ENABLED, BACKEND_URLS, getAuthHeaders } from "../../config/api";
 import "./Chat.css";
 
 interface Message {
@@ -285,14 +285,14 @@ const Chat: React.FC<ChatProps> = ({
           <IoChatbubblesOutline className="livechat-signin-icon" />
           <h2 className="livechat-signin-title">Live Chat</h2>
           <p className="livechat-signin-subtitle">
-            Connect with other Gators in real time
+            {AUTH_ENABLED ? "Connect with other Gators in real time" : "Live chat will be available after account hosting is configured."}
           </p>
-          <button
+          {AUTH_ENABLED && <button
             className="livechat-signin-btn"
             onClick={() => auth.signinRedirect()}
           >
             Sign in to chat
-          </button>
+          </button>}
         </div>
       );
     }

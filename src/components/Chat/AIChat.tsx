@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { IoSend } from "react-icons/io5";
 import { BsStars } from "react-icons/bs";
 import { LuHistory } from "react-icons/lu";
-import { BACKEND_URLS, getAuthHeaders } from "../../config/api";
+import { AUTH_ENABLED, BACKEND_URLS, getAuthHeaders } from "../../config/api";
 import { useAIActionStore } from "../../store/aiActionStore";
 import ToolCallCard from "./ToolCallCard";
 import ChatHistoryPanel from "./ChatHistoryPanel";
@@ -258,14 +258,14 @@ const AIChat: React.FC = () => {
           <BsStars className="ai-view-empty-icon" />
           <h2 className="ai-view-empty-title">AI Assistant</h2>
           <p className="ai-view-empty-subtitle">
-            Get help with courses, sections, and schedules
+            {AUTH_ENABLED ? "Get help with courses, sections, and schedules" : "The AI assistant will be available after account hosting is configured."}
           </p>
-          <button
+          {AUTH_ENABLED && <button
             className="ai-view-signin-btn"
             onClick={() => auth.signinRedirect()}
           >
             Sign in to use AI Assistant
-          </button>
+          </button>}
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Course } from "../CourseTypes";
+import { isFullyOnline } from "../sectionAvailability";
 import { courseUIClasses } from "../CourseUIClasses";
 
 export type CourseCardProps = {
@@ -9,8 +10,6 @@ export type CourseCardProps = {
 
 const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
   const [termExists, setTermExists] = useState(false);
-  const [meetTimeExists, setMeetTimeExists] = useState(false);
-  const [finalExamExists, setFinalExamExists] = useState(false);
 
   const isMobile = useMediaQuery({ maxWidth: 640 });
 
@@ -18,15 +17,6 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
     const doesTermExist = course.termInd !== " ";
     setTermExists(doesTermExist);
 
-    const doesMeetTimeExist = course.sections.some(
-      (section) => section.meetTimes && section.meetTimes.length > 0
-    );
-    setMeetTimeExists(doesMeetTimeExist);
-
-    const doesFinalExamExist = course.sections.some(
-      (section) => section.finalExam && section.finalExam.length > 0
-    );
-    setFinalExamExists(doesFinalExamExist);
   }, [course]);
 
   const {
@@ -72,11 +62,15 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
                   .join(", ")}
                 <br />
                 <strong>Meeting Times:</strong>
-                {meetTimeExists ? "" : " N/A"}
+                {section.meetTimes?.length
+                  ? ""
+                  : isFullyOnline(section)
+                  ? " Fully online"
+                  : " Unavailable from UF"}
                 <ul
                   className={`${isMobile ? "ml-0" : "ml-4"}`}
                 >
-                  {meetTimeExists &&
+                  {Boolean(section.meetTimes?.length) &&
                     section.meetTimes.map((meetTime, index) => (
                       <li key={index} className={listItem}>
                         Days: {meetTime.meetDays.join(", ")}
@@ -90,7 +84,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
                     ))}
                 </ul>
                 <strong>Final Exam:</strong>{" "}
-                {finalExamExists ? section.finalExam : "N/A"}
+                {section.finalExam || "N/A"}
               </div>
             </div>
             <br />

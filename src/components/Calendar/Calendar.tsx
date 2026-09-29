@@ -1,4 +1,5 @@
 import { Course, Section } from "../CourseUI/CourseTypes";
+import { hasKnownSchedule, hasUnavailableTimes, isFullyOnline } from "../CourseUI/sectionAvailability";
 import "./CalendarStyle.css";
 import { ViewState } from "@devexpress/dx-react-scheduler";
 import { Paper } from "@mui/material";
@@ -228,7 +229,8 @@ const Calendar: React.FC<CalendarProps> = ({
         if (
           parsedValue &&
           Array.isArray(parsedValue.appointments) &&
-          Array.isArray(parsedValue.combination)
+          Array.isArray(parsedValue.combination) &&
+          parsedValue.combination.every(hasKnownSchedule)
         ) {
           const adjustedAppointments = adjustAppointmentsToCurrentWeek(parsedValue.appointments);
           return { appointments: adjustedAppointments, combination: parsedValue.combination };
@@ -283,7 +285,8 @@ const Calendar: React.FC<CalendarProps> = ({
         if (
           parsedCalendar &&
           Array.isArray(parsedCalendar.appointments) &&
-          Array.isArray(parsedCalendar.combination)
+          Array.isArray(parsedCalendar.combination) &&
+          parsedCalendar.combination.every(hasKnownSchedule)
         ) {
           const adjustedAppointments = adjustAppointmentsToCurrentWeek(parsedCalendar.appointments);
           setSelectedCalendar({ 
@@ -317,20 +320,20 @@ const Calendar: React.FC<CalendarProps> = ({
       if (selectedSection) {
         selectedSection.courseName = course.name;
         selectedSection.courseCode = course.code;
-        return [selectedSection];
+        return hasKnownSchedule(selectedSection) ? [selectedSection] : [];
       } else {
         course.sections.forEach((section) => {
           section.courseName = course.name;
           section.courseCode = course.code;
         });
 
-        let allowedNoMeetTimeSection = true;
+        let allowedOnlineSection = true;
 
         return course.sections.filter((section) => {
           if (section.meetTimes && section.meetTimes.length > 0) {
             return true;
-          } else if (allowedNoMeetTimeSection) {
-            allowedNoMeetTimeSection = false;
+          } else if (isFullyOnline(section) && allowedOnlineSection) {
+            allowedOnlineSection = false;
             return true;
           }
           return false;
@@ -380,6 +383,10 @@ const Calendar: React.FC<CalendarProps> = ({
   const allSelectedSections = useMemo(
     () => getAllSelectedSections(),
     [selectedCourses]
+  );
+  const unavailableTimesCount = selectedCourses.reduce(
+    (count, course) => count + course.sections.filter(hasUnavailableTimes).length,
+    0
   );
 
   const [allCombinations, setAllCombinations] = useState<Section[][]>(() =>
@@ -536,7 +543,7 @@ const Calendar: React.FC<CalendarProps> = ({
     let mainResourceName = "classNumber";
 
     const onlineSections = combination.filter(
-      (section) => !section.meetTimes || section.meetTimes.length === 0
+      (section) => isFullyOnline(section) && !section.meetTimes?.length
     );
 
     const onlineSectionNames = onlineSections.map(
@@ -769,6 +776,11 @@ const Calendar: React.FC<CalendarProps> = ({
 
   return (
     <div className="calendar-container-2">
+      {unavailableTimesCount > 0 && (
+        <div role="status" className="mx-5 my-3 rounded bg-amber-900 p-3 text-white">
+          UF has not provided meeting times for {unavailableTimesCount} selected section{unavailableTimesCount === 1 ? "" : "s"}. Those sections are excluded from generated schedules.
+        </div>
+      )}
       {isLoadingSort && <div className="spinner"></div>}
       <div className="calendar-display">
         {isAppointmentFormVisible && (

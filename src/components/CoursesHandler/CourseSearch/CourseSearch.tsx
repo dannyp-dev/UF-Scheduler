@@ -7,6 +7,7 @@ import { useAuth } from "react-oidc-context";
 import { BACKEND_URLS, getAuthHeaders } from "../../../config/api";
 
 interface CourseSearchProps {
+  availableTerms: { term: string; year: string; courses: number; sectionsWithMeetingTimes: number }[];
   setDebouncedSearchTerm: (searchTerm: string) => void;
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
@@ -17,6 +18,7 @@ interface CourseSearchProps {
 }
 
 const CourseSearch: React.FC<CourseSearchProps> = ({
+  availableTerms,
   setDebouncedSearchTerm,
   searchTerm,
   setSearchTerm,
@@ -77,9 +79,11 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
         onChange={handleTermChange}
         className="term-year-dropdown bg-[#f0f0f0] text-base text-[#6d727e] font-sans font-semibold"
       >
-        <option value="summer 26">Summer 26</option>
-        <option value="fall 26">Fall 26</option>
-        <option value="spring 26">Spring 26</option>
+        {availableTerms.map(({ term, year }) => (
+          <option key={`${term}_${year}`} value={`${term} ${year}`}>
+            {term.charAt(0).toUpperCase() + term.slice(1)} {year}
+          </option>
+        ))}
       </select>
       </div>
     </div>

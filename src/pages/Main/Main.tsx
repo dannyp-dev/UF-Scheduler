@@ -20,6 +20,9 @@ import { useAIActionStore } from "../../store/aiActionStore";
 import { API_URLS, BACKEND_URLS } from "../../config/api";
 
 const Main = () => {
+  const [availableTerms, setAvailableTerms] = useState<
+    { term: string; year: string; courses: number; sectionsWithMeetingTimes: number }[]
+  >([]);
   const [selectedMajor, setSelectedMajor] = useState<string | null>(() => {
     const storedSelectedMajor = localStorage.getItem("selectedMajor");
     if (storedSelectedMajor) {
@@ -30,13 +33,13 @@ const Main = () => {
   });
 
   const [term, setTerm] = useState<string>(() => {
-    return localStorage.getItem("selectedTerm") ?? "summer";
+    return localStorage.getItem("selectedTerm") ?? "spring";
   });
   const [year, setYear] = useState<string>(() => {
     return localStorage.getItem("selectedYear") ?? "26";
   });
   const [selectedValue, setSelectedValue] = useState<string>(() => {
-    return localStorage.getItem("selectedTermValue") ?? "summer 26";
+    return localStorage.getItem("selectedTermValue") ?? "spring 26";
   });
   const [calendarResetKey, setCalendarResetKey] = useState<string>(
     `${term}_${year}`
@@ -289,6 +292,27 @@ const Main = () => {
 
   };
 
+  useEffect(() => {
+    axios.get(API_URLS.TERMS).then((response) => {
+      const terms = response.data as typeof availableTerms;
+      setAvailableTerms(terms);
+      if (terms.length === 0) return;
+      if (!terms.some((item) => `${item.term} ${item.year}` === selectedValue)) {
+        const latest = terms[terms.length - 1];
+        const value = `${latest.term} ${latest.year}`;
+        setSelectedValue(value);
+        setTerm(latest.term);
+        setYear(latest.year);
+        setCalendarResetKey(`${latest.term}_${latest.year}`);
+        setSelectedCourses(JSON.parse(localStorage.getItem(`selectedCourses_${latest.term}_${latest.year}`) || "[]"));
+        setCustomAppointments(JSON.parse(localStorage.getItem(`customAppointments_${latest.term}_${latest.year}`) || "[]"));
+        localStorage.setItem("selectedTerm", latest.term);
+        localStorage.setItem("selectedYear", latest.year);
+        localStorage.setItem("selectedTermValue", value);
+      }
+    }).catch(() => setAvailableTerms([]));
+  }, [selectedValue]);
+
   return (
     <div className="sora-unique">
       <div className={`chat ${isChatVisible ? "visible" : "hidden"}`}>
@@ -375,6 +399,7 @@ const Main = () => {
               term={term}
               year={year}
               selectedValue={selectedValue}
+              availableTerms={availableTerms}
               handleTermChange={handleTermChange}
               searchTrigger={searchTrigger}
               setSearchTrigger={setSearchTrigger}

@@ -1,5 +1,6 @@
 import React from "react";
 import { Course, Section, websiteURL } from "../CourseTypes";
+import { isFullyOnline } from "../sectionAvailability";
 import { courseUIClasses } from "../CourseUIClasses";
 import { BiSolidLockOpen, BiSolidLockAlt } from "react-icons/bi";
 import { DropdownClasses } from "./DropdownClasses";
@@ -198,7 +199,7 @@ const CourseDropdown: React.FC<CourseDropdownProps> = ({
             ))
           ) : (
             <span className={`${content} text-gray-200`}>
-              N/A
+              {isFullyOnline(section) ? "Fully online" : "Unavailable from UF"}
             </span>
           )}
         </div>

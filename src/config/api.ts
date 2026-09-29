@@ -11,9 +11,9 @@ import type { AuthContextProps } from "react-oidc-context";
 import { WebStorageStateStore } from "oidc-client-ts";
 
 // API Server - handles course data and schedule generation
-export const API_BASE_URL = process.env.REACT_APP_API_SERVER_IP as string;
+export const API_BASE_URL = process.env.REACT_APP_API_SERVER_IP || window.location.origin;
 // Backend Server - handles metrics, chat, and user data (now via API Gateway)
-export const BACKEND_BASE_URL = process.env.REACT_APP_BACKEND_SERVER_IP as string;
+export const BACKEND_BASE_URL = process.env.REACT_APP_BACKEND_SERVER_IP || API_BASE_URL;
 
 /**
  * Cognito OIDC configuration, read from environment variables.
@@ -37,6 +37,9 @@ export const cognitoConfig = {
 
 export const COGNITO_DOMAIN = process.env.REACT_APP_COGNITO_DOMAIN as string;
 export const COGNITO_LOGOUT_URI = process.env.REACT_APP_COGNITO_LOGOUT_URI as string;
+export const AUTH_ENABLED = Boolean(
+  cognitoConfig.authority && cognitoConfig.client_id && cognitoConfig.redirect_uri
+);
 
 /**
  * Build auth headers from the react-oidc-context auth object.
@@ -64,6 +67,7 @@ export const signOutRedirect = () => {
  * Course-related endpoints for fetching and generating schedules
  */
 export const API_ENDPOINTS = {
+  TERMS: '/api/terms',
   GET_COURSES: '/api/get_courses',
   GENERATE_A_LIST: '/generate_a_list',
 } as const;
@@ -106,6 +110,7 @@ export const buildBackendUrl = (endpoint: string): string => {
  * Pre-built API URLs (api.ufscheduler.com)
  */
 export const API_URLS = {
+  TERMS: buildApiUrl(API_ENDPOINTS.TERMS),
   GET_COURSES: buildApiUrl(API_ENDPOINTS.GET_COURSES),
   GENERATE_A_LIST: buildApiUrl(API_ENDPOINTS.GENERATE_A_LIST),
 } as const;
