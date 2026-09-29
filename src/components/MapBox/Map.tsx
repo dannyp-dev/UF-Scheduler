@@ -372,10 +372,12 @@ const Map: React.FC<MapProps> = ({ term, year }) => {
     let map: mapboxgl.Map | null = null;
     mapLoadedRef.current = false;
 
+    if (!process.env.REACT_APP_MAPBOX_ACCESS_TOKEN) return;
+
     if (mapContainerRef.current) {
       map = new mapboxgl.Map({
         container: mapContainerRef.current,
-        style: "mapbox://styles/andycn7/cm2mvgs99004701qsb31w406a",
+        style: "mapbox://styles/mapbox/streets-v12",
         center: [-82.346, 29.646],
         zoom: 15.25,
       });
@@ -644,6 +646,10 @@ const Map: React.FC<MapProps> = ({ term, year }) => {
       document.body.style.overflow = '';
     };
   }, [mapFullscreen]);
+
+  if (!process.env.REACT_APP_MAPBOX_ACCESS_TOKEN) {
+    return <div style={{ padding: 24 }}>The campus map will be available after a Mapbox account is configured.</div>;
+  }
 
   return (
     <div>

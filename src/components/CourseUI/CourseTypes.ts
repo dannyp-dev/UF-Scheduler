@@ -16,6 +16,7 @@ export type MeetingTime = {
 
 export type Section = {
   classNumber: string;
+  sectWeb?: string;
   display: string;
   credits: number | "VAR"; // Allow credits to be a number or "VAR"
   deptName: string;

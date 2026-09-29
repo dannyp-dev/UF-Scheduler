@@ -20,7 +20,7 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
-    ReactGA.send({
+    if (process.env.REACT_APP_GA_TOKEN) ReactGA.send({
       hitType: "pageview",
       page: location.pathname,
     });

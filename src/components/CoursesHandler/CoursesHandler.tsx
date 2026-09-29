@@ -5,6 +5,7 @@ import { Course } from "../CourseUI/CourseTypes";
 import "./CourseHandlerStyles.css"
 
 interface CoursesHandlerProps {
+  availableTerms: { term: string; year: string; courses: number; sectionsWithMeetingTimes: number }[];
   selectedCourses: Course[];
   setSelectedCourses: React.Dispatch<React.SetStateAction<Course[]>>;
   selectedMajor: string | null;
@@ -28,6 +29,7 @@ interface CoursesHandlerProps {
 const CoursesHandler: React.FC<CoursesHandlerProps> = (
   {
     selectedCourses,
+    availableTerms,
     setSelectedCourses,
     selectedMajor,
     setSelectedMajor,
@@ -64,6 +66,7 @@ const CoursesHandler: React.FC<CoursesHandlerProps> = (
         setSelectedMajor={setSelectedMajor}
       /> */}
       <CourseSearch
+        availableTerms={availableTerms}
         setDebouncedSearchTerm={setDebouncedSearchTerm}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}

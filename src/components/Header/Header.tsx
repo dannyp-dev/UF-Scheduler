@@ -7,7 +7,7 @@ import { IoMapOutline } from "react-icons/io5";
 import { BsStars } from "react-icons/bs";
 import { Course } from "../CourseUI/CourseTypes";
 import { useAuth } from "react-oidc-context";
-import { signOutRedirect } from "../../config/api";
+import { AUTH_ENABLED, signOutRedirect } from "../../config/api";
 
 interface HeaderProps {
   calendarView: () => void;
@@ -253,7 +253,7 @@ const Header: React.FC<HeaderProps> = ({
                 )}
               </button>
             </>
-          ) : (
+          ) : AUTH_ENABLED ? (
             <button
               className="auth-signin-btn"
               onClick={() => auth.signinRedirect()}
@@ -264,7 +264,7 @@ const Header: React.FC<HeaderProps> = ({
                 <BiLogIn size={18} />
               )}
             </button>
-          )}
+          ) : null}
         </div>
       </div>
       {windowWidth < 1001 && (

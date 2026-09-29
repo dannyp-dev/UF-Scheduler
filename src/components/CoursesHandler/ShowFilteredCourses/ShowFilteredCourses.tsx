@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Course } from "../../CourseUI/CourseTypes";
+import { isFullyOnline } from "../../CourseUI/sectionAvailability";
 import CourseDropdown from "../../CourseUI/CourseDropdown/CourseDropdown";
 import { ShowFilteredCoursesClasses } from "./ShowFilteredCoursesClasses";
 import InfiniteScroll from "react-infinite-scroller";
@@ -114,12 +115,12 @@ const ShowFilteredCourses: React.FC<ShowFilteredCoursesProps> = ({
     }
   };
 
-  // New function to add only non-online sections
+  // Add sections that are not fully online, even when UF has hidden their times.
   const toggleNonOnlineSections = (course: Course) => {
     setLoaded(true);
 
     const nonOnlineSections = course.sections.filter(
-      (section) => section.meetTimes && section.meetTimes.length > 0
+      (section) => !isFullyOnline(section)
     );
 
     const selectedNonOnline = {

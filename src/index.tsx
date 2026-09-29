@@ -6,18 +6,24 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import ReactGA from 'react-ga4';
 import 'react-tooltip/dist/react-tooltip.css'
-import { AuthProvider } from 'react-oidc-context';
-import { cognitoConfig } from './config/api';
+import { AuthContext, AuthContextProps, AuthProvider } from 'react-oidc-context';
+import { AUTH_ENABLED, cognitoConfig } from './config/api';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-ReactGA.initialize(process.env.REACT_APP_GA_TOKEN as string);
+const analyticsEnabled = Boolean(process.env.REACT_APP_GA_TOKEN);
+if (analyticsEnabled) ReactGA.initialize(process.env.REACT_APP_GA_TOKEN as string);
+const guestAuth = { isAuthenticated: false, isLoading: false, user: null } as AuthContextProps;
 root.render(
   <React.StrictMode>
-    <AuthProvider {...cognitoConfig}>
+    {AUTH_ENABLED ? <AuthProvider {...cognitoConfig}>
       <BrowserRouter>
         <App />
       </BrowserRouter>
-    </AuthProvider>
+    </AuthProvider> : <AuthContext.Provider value={guestAuth}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </AuthContext.Provider>}
   </React.StrictMode>
 );
 
@@ -30,7 +36,7 @@ type WebVitalMetric = {
 const sendToGoogleAnalytics = (metric: WebVitalMetric) => {
   const { id, name, value } = metric;
 
-  ReactGA.send({
+  if (analyticsEnabled) ReactGA.send({
     hitType: 'event',
     eventCategory: 'Web Vitals',
     eventAction: name,
